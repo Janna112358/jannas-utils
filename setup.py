@@ -83,11 +83,11 @@ import sys
 #    #   the path and import from there
 
 
-setup(name='jannas-utils',
+setup(name='jannasutils',
       version='0.0',
       url='https://github.com/Janna112358/jannas-utils.git',
       author='Janna112358',
-      packages=['jannas-utils'],
+      packages=['jannasutils'],
       zip_safe=False,
 #      cmdclass={'install': CustomInstallCommand,
 #                'develop': CustomDevelopCommand}
