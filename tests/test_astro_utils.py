@@ -66,7 +66,6 @@ class Test_angular_distance(unittest.TestCase):
             self.assertTrue(np.allclose(delta, 
                     ju.ang_distance([np.pi/2.0, 3.5], [np.pi/2.0, 3.5+delta])))
         
-        
 class Test_random_location(unittest.TestCase):
     
     def test_output_range(self):
