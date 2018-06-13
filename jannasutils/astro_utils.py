@@ -45,7 +45,7 @@ def radec_to_thetaphi(ra_hours, ra_mins, dec_degs, dec_mins):
     # Convert Ra and Dec angles to theta and phi angles
     return radec_reduced_to_thetaphi(ra_rad, dec_rad, unit='rad')
 
-def thetaphi_to_radec(theta, phi): 
+def thetaphi_to_radec(theta, phi, return_radians=False): 
     """
     Convert theta, phi to Ra, Dec
     
@@ -55,6 +55,9 @@ def thetaphi_to_radec(theta, phi):
         theta (polar) coordinate in radians, between 0 and pi
     phi: float
         phi (polar) coordinate in radians, between 0 and 2 pi
+    return_radians: bool
+        default = False
+        if True, return ra and dec in radians
     
     Returns
     -------
@@ -63,9 +66,13 @@ def thetaphi_to_radec(theta, phi):
     float: whole degrees of the declination
     float: arcminutes of the declination
         Note, for negative declination both degrees and arcminutes are negative
+    if return_radians, return float, float being ra and dec in radians respectively
     """
     dec_phase = (0.5 * np.pi - theta) / (RAD_TOT)
     ra_phase = (2 * np.pi - phi) / (RAD_TOT)
+    
+    if return_radians:
+        return ra_phase * RAD_TOT, dec_phase * RAD_TOT
     
     ra_hours = int(ra_phase * HOUR_TOT)
     ra_mins = (ra_phase - (ra_hours / HOUR_TOT)) * MIN_TOT
@@ -109,6 +116,34 @@ def radec_reduced_to_thetaphi(ra, dec, unit='rad'):
     theta = 0.5 * np.pi - dec
     phi = 2 * np.pi - ra
     return theta, phi
+    
+def ang_distance(A, B, small_distance_treshold=0.05):
+    """
+    Calculate angular distance in radians between A and B sky locations
+    
+    Parameters
+    ----------
+    A, B: list or NumPy Array
+        theta, phi coordinates (in radians)
+        with theta between 0 an pi and phi between 0 and 2 pi
+    
+    Returns
+    -------
+    float: angular distance in radians
+    """
+    raA, decA = thetaphi_to_radec(*A, return_radians=True)
+    raB, decB = thetaphi_to_radec(*B, return_radians=True)
+
+    dist = np.arccos(np.sin(decA) * np.sin(decB) +
+                     np.cos(decA) * np.cos(decB) * np.cos(raA - raB))
+    
+    # if points are very close, the above formula is inaccurate so we use
+    # the quadrature sum approximation (which only works for small distances)
+    if dist < small_distance_treshold:
+        dist = ((raA - raB)**2. + (decA - decB)**2.)**0.5
+    
+    return dist
+
 
 def randomLocation(r=None):
     """
@@ -161,7 +196,7 @@ def randomLocation(r=None):
         x = np.sqrt(a) * np.cos(psi)
         y = np.sqrt(a) * np.sin(psi)
     
-        phi = x
+        phi = x%(2 * np.pi)
         theta = 0.5 * np.pi - y
     
     return theta, phi
@@ -277,13 +312,29 @@ def decorate_chirp_mass(func):
     def func_wrapper(mBH, q):
         if isIterable(mBH):
             mBH_exp = np.expand_dims(mBH, axis=1)
-            return func(mBH_exp, q)
+            return func(mBH_exp, q).squeeze()
         else:
             return func(mBH, q)
     return func_wrapper
             
 @decorate_chirp_mass
 def chirp_mass(mBH, q):
+    """
+    Calculate chirp mass
+    
+    Parameters
+    ----------
+    mBH: float or array
+        total mass of the binary black hole
+    q: float or array
+        mass ratio of the binary, between 0 and 1
+    
+    Returns
+    -------
+    float or array: chirp mass
+        If mBH and q are both arrays of length N and M, respectively, 
+        return an array of shape (N, M)
+    """
     return (mBH * q**(3./5)) / ((1+q)**(6./5))
 
 def logexp_M_Mbulge_linear(logmBulge, alpha, beta):
@@ -336,23 +387,3 @@ def logexpShankar(logmBulge, a=7.574, b=1.946, c=-0.306, d=-0.011):
     x = logmBulge - 11
     return a + b*x + c*x**2.0 + d*x**3.0
 
-    
-def ang_distance(A, B):
-    """
-    Calculate angular distance in radians between A and B sky locations
-    
-    Parameters
-    ----------
-    A, B: list or NumPy Array
-        theta, phi coordinates (in radians)
-    
-    Returns
-    -------
-    float: angular distance in radians
-    """
-    
-    dtheta = abs(A[0] - B[0]) % np.pi
-    min_dtheta = np.min([dtheta, np.pi - dtheta])
-    dphi = abs(A[1] - B[1]) % (2*np.pi)
-    min_dphi = np.min([dphi, 2*np.pi - dphi])
-    return np.sqrt(min_dtheta**2.0 + min_dphi**2.0)
