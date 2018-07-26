@@ -70,7 +70,7 @@ class Test_random_location(unittest.TestCase):
     
     def test_output_range(self):
         for i in range(20):
-            theta, phi = ju.randomLocation()
+            theta, phi = ju.random_location()
             self.assertTrue(theta >= 0 and theta < np.pi)
             self.assertTrue(phi >= 0 and phi < 2 * np.pi)
         
@@ -78,7 +78,7 @@ class Test_random_location(unittest.TestCase):
     # when r < 0.5 pi
     def test_output_range_smallr(self):
         for j in range(20):
-            theta, phi = ju.randomLocation(r=0.3)
+            theta, phi = ju.random_location(r=0.3)
             self.assertTrue(theta >= 0 and theta < np.pi)
             self.assertTrue(phi >= 0 and phi < 2 * np.pi)
         
@@ -87,7 +87,7 @@ class Test_random_location(unittest.TestCase):
         radius = [0.01 * np.pi, 0.1 * np.pi, np.pi]
         for r in radius: 
             for k in range(20):
-                theta, phi = ju.randomLocation(r=r)
+                theta, phi = ju.random_location(r=r)
                 self.assertTrue(abs(theta - np.pi/2.0) <= r)
                 self.assertTrue(min(phi, 2*np.pi - phi) <= r)
 

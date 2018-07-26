@@ -5,7 +5,6 @@ Created on Mon Jun 11 17:08:52 2018
 
 @author: jgoldstein
 """
-
 import numpy as np
 import numpy.random as rd
 from scipy.integrate import quad
@@ -145,7 +144,7 @@ def ang_distance(A, B, small_distance_treshold=0.05):
     return dist
 
 
-def randomLocation(r=None):
+def random_location(r=None):
     """
     Get a random sky location within radius r of middle point (pi/2, 0)
     
@@ -337,6 +336,17 @@ def chirp_mass(mBH, q):
     """
     return (mBH * q**(3./5)) / ((1+q)**(6./5))
 
+
+def decorate_logexp_MMbulge(func):
+    def func_wrapper(logmBulge, alpha, beta):
+        if isIterable(alpha):
+            alpha_exp = np.expand_dims(alpha, axis=1)
+            return func(logmBulge, alpha_exp, beta).squeeze()
+        else:
+            return func(logmBulge, alpha, beta)
+    return func_wrapper
+
+@decorate_logexp_MMbulge
 def logexp_M_Mbulge_linear(logmBulge, alpha, beta):
     """
     Expectted log black hole mass given linear M-Mbulge relation 
