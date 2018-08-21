@@ -197,8 +197,9 @@ class LikelihoodData:
         if self.amp_marginalised:
             return np.exp(self._logl - np.max(self._logl))
         
-        ls = np.exp(self._logl)
-        ls_sum = np.sum(ls, axis=1)
+        # marginalise over amplitude assuming a log flat prior and 
+        # evenly distributed log(A) samples
+        ls_sum = np.sum(self._ls, axis=1)
         logl_sum = np.log(ls_sum)
         m = np.exp(logl_sum - np.max(logl_sum))
         # set any values that were masked in the logl map again to UNSEEN

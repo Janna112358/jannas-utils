@@ -339,7 +339,15 @@ def chirp_mass(mBH, q):
 
 def decorate_logexp_MMbulge(func):
     def func_wrapper(logmBulge, alpha, beta):
-        if isIterable(alpha):
+        if isIterable(logmBulge) and isIterable(alpha):
+            logmBulge_exp = np.expand_dims(logmBulge, axis=1)
+            logmBulge_exp = np.expand_dims(logmBulge_exp, axis=2)
+            alpha_exp = np.expand_dims(alpha, axis=1)
+            return func(logmBulge_exp, alpha_exp, beta).squeeze()
+        elif isIterable(logmBulge):
+            logmBulge_exp = np.expand_dims(logmBulge, axis=1)
+            return func(logmBulge_exp, alpha, beta).squeeze()
+        elif isIterable(alpha):
             alpha_exp = np.expand_dims(alpha, axis=1)
             return func(logmBulge, alpha_exp, beta).squeeze()
         else:
