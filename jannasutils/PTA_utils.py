@@ -214,13 +214,13 @@ class LikelihoodData:
             for p in range(len(m)):
                 if p not in pixels:
                     m[p] = hp.UNSEEN
+        if title is None:
+            title=''
         hp.mollview(m, title=title, min=vmin, max=vmax)
         for i, p in enumerate(self._pulsars):
             hp.projplot(p[0], p[1], c='w', marker='*', markersize=8)
         if source is not None:
             hp.projplot(source[0], source[1], c='w', marker='o', markersize=6)
-        #if title is not None:
-        #    plt.title(str(title))
         if save is None:
             plt.show()
         else:
