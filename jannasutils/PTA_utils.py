@@ -207,7 +207,8 @@ class LikelihoodData:
         return m
     
     def plot_skymap(self, source=None, save=None, mask=False, 
-                    transparent=False, title=None, vmin=None, vmax=None):
+                    transparent=False, title=None, cb_label=None, 
+                    vmin=None, vmax=None):
         m = self.get_skymap()
         if mask:
             loc, pixels, _ = self.calc_localisation()
@@ -216,7 +217,9 @@ class LikelihoodData:
                     m[p] = hp.UNSEEN
         if title is None:
             title=''
-        hp.mollview(m, title=title, min=vmin, max=vmax)
+        if cb_label is None:
+            cb_label = ''
+        hp.mollview(m, title=title, unit=cb_label, min=vmin, max=vmax)
         for i, p in enumerate(self._pulsars):
             hp.projplot(p[0], p[1], c='w', marker='*', markersize=8)
         if source is not None:
